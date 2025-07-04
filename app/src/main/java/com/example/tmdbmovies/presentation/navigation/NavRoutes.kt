@@ -7,4 +7,7 @@ object NavRoutes {
     const val HOME = "home"
     const val FAVORITES = "favorites"
     const val SETTINGS = "settings"
+    const val DETAILS = "details/{movieId}"
+
+    fun detailsRoute(movieId: Int) = "details/$movieId"
 }
