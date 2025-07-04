@@ -3,13 +3,16 @@ package com.example.tmdbmovies.presentation.feed
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,17 +32,17 @@ fun FeedScreen(
     navController: NavController
 ) {
     val state by viewModel.uiState.collectAsState()
+    var selectedFilter by remember { mutableStateOf("day") }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadTrendingMovies()
+    LaunchedEffect(selectedFilter) {
+        viewModel.loadTrendingMovies(timeWindow = selectedFilter)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Feed", style = MaterialTheme.typography.titleLarge) },
-                modifier = Modifier
-                    .statusBarsPadding(),
+                modifier = Modifier.statusBarsPadding(),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -47,12 +50,40 @@ fun FeedScreen(
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Column(modifier = Modifier.padding(innerPadding)) {
+            //Most Popular + Filters (Day, Week)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Most Popular",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Row {
+                    FilterChip(
+                        selected = selectedFilter == "day",
+                        onClick = { selectedFilter = "day" },
+                        label = { Text("Today") }
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    FilterChip(
+                        selected = selectedFilter == "week",
+                        onClick = { selectedFilter = "week" },
+                        label = { Text("This Week") }
+                    )
+                }
+            }
+
+            //Movie content
             when (state) {
                 is FeedUiState.Loading -> LoadingState()
                 is FeedUiState.Error -> ErrorState(
                     message = (state as FeedUiState.Error).message,
-                    onRetry = { viewModel.loadTrendingMovies() }
+                    onRetry = { viewModel.loadTrendingMovies(selectedFilter) }
                 )
                 is FeedUiState.Success -> SuccessState(
                     movies = (state as FeedUiState.Success).movies,
@@ -64,6 +95,8 @@ fun FeedScreen(
         }
     }
 }
+
+
 
 
 @Composable
@@ -91,12 +124,10 @@ fun SuccessState(
     movies: List<Movie>,
     onMovieClick: (Int) -> Unit
 ) {
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 128.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        contentPadding = PaddingValues(8.dp)
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
         items(movies) { movie ->
             MovieCard(movie = movie, onClick = { onMovieClick(movie.id) })
@@ -112,9 +143,8 @@ fun MovieCard(
 ) {
     Column(
         modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clickable { onClick() }, // 👈 Add clickable modifier
+            .width(160.dp)
+            .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val imageUrl = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
@@ -129,15 +159,23 @@ fun MovieCard(
             painter = painter,
             contentDescription = movie.title,
             modifier = Modifier
-                .height(180.dp)
-                .fillMaxWidth()
+                .height(240.dp)
+                .fillMaxWidth(),
+            contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = movie.title,
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
+            maxLines = 1
+        )
+
+        Text(
+            text = "⭐ ${movie.voteAverage}/10",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }
