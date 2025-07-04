@@ -1,6 +1,5 @@
 package com.example.tmdbmovies.di
 
-import com.example.movielibrary.data.remote.TmdbApi
 import com.example.tmdbmovies.data.remote.TmdbApi
 import dagger.Module
 import dagger.Provides
