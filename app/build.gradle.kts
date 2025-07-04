@@ -1,7 +1,20 @@
+import java.util.Properties
+import org.gradle.api.GradleException
+
+//Load TMDB_API_KEY from local.properties
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+
+val tmdbApiKey = localProperties.getProperty("TMDB_API_KEY")
+    ?: throw GradleException("TMDB_API_KEY not found in local.properties")
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -16,6 +29,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "TMDB_API_KEY", "\"$tmdbApiKey\"")
     }
 
     buildTypes {
@@ -36,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -56,4 +72,27 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Retrofit + Gson
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+
+    // OkHttp logging
+    implementation(libs.okhttp.logging)
+
+    // Coil for Compose
+    implementation(libs.coil.compose)
+
+    // Hilt DI
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    // Navigation
+    implementation(libs.navigation.compose)
+
+    // DataStore (for favorites persistence)
+    implementation(libs.androidx.datastore.preferences)
+
+
 }
