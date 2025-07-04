@@ -20,7 +20,9 @@ fun FavoritesScreen(
     } else {
         LazyVerticalGrid(columns = GridCells.Adaptive(128.dp)) {
             items(favorites) { movie ->
-                MovieCard(movie = movie)
+                //Leave onClick empty, since Favorites Screen does not need click handling
+                MovieCard(movie = movie, onClick = {})
+
             }
         }
     }

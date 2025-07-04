@@ -18,7 +18,7 @@ fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    NavHost(
+    androidx.navigation.compose.NavHost(
         navController = navController,
         startDestination = NavRoutes.HOME,
         modifier = modifier
@@ -26,17 +26,20 @@ fun AppNavHost(
         composable(NavRoutes.HOME) {
             FeedScreen(navController = navController)
         }
-        composable(NavRoutes.FAVORITES) { FavoritesScreen() }
-        composable(NavRoutes.SETTINGS) { SettingsScreen() }
-
+        composable(NavRoutes.FAVORITES) {
+            FavoritesScreen()
+        }
+        composable(NavRoutes.SETTINGS) {
+            SettingsScreen()
+        }
         composable(
             route = NavRoutes.DETAILS,
             arguments = listOf(navArgument("movieId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val movieId = backStackEntry.arguments?.getInt("movieId") ?: -1
+        ) {
+            val movieId = it.arguments?.getInt("movieId") ?: -1
             MovieDetailsScreen(movieId = movieId)
         }
-
     }
 }
+
 
