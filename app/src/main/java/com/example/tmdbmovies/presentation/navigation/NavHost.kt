@@ -53,7 +53,10 @@ fun AppNavHost(
             arguments = listOf(navArgument("movieId") { type = NavType.IntType })
         ) {
             val movieId = it.arguments?.getInt("movieId") ?: -1
-            MovieDetailsScreen(movieId = movieId)
+            MovieDetailsScreen(
+                movieId = movieId,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
