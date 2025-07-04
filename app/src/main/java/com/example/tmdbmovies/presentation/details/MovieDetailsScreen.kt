@@ -3,6 +3,7 @@ package com.example.tmdbmovies.presentation.details
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
@@ -17,10 +18,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailsScreen(
     movieId: Int,
-    viewModel: DetailViewModel = hiltViewModel()
+    viewModel: DetailViewModel = hiltViewModel(),
+    onBack: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
@@ -29,23 +33,44 @@ fun MovieDetailsScreen(
         viewModel.loadMovie(movieId)
     }
 
-    when (state) {
-        is DetailUiState.Loading -> LoadingState()
-        is DetailUiState.Error -> ErrorState((state as DetailUiState.Error).message)
-        is DetailUiState.Success -> {
-            val movie = (state as DetailUiState.Success).movie
-            MovieDetailContent(
-                title = movie.title,
-                overview = movie.overview,
-                releaseDate = movie.releaseDate,
-                voteAverage = movie.voteAverage,
-                posterPath = movie.posterPath,
-                isFavorite = isFavorite,
-                onToggleFavorite = { viewModel.toggleFavorite() }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Movie Details", style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                modifier = Modifier.statusBarsPadding(),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (state) {
+                is DetailUiState.Loading -> LoadingState()
+                is DetailUiState.Error -> ErrorState((state as DetailUiState.Error).message)
+                is DetailUiState.Success -> {
+                    val movie = (state as DetailUiState.Success).movie
+                    MovieDetailContent(
+                        title = movie.title,
+                        overview = movie.overview,
+                        releaseDate = movie.releaseDate,
+                        voteAverage = movie.voteAverage,
+                        posterPath = movie.posterPath,
+                        isFavorite = isFavorite,
+                        onToggleFavorite = { viewModel.toggleFavorite() }
+                    )
+                }
+            }
         }
     }
 }
+
 
 @Composable
 fun MovieDetailContent(

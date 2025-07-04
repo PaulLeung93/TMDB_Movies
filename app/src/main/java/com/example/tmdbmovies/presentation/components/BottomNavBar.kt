@@ -37,7 +37,10 @@ fun BottomNavBar(
     currentRoute: String,
     onItemClick: (BottomNavItem) -> Unit
 ) {
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
+    ) {
         bottomNavItems.forEach { item ->
             NavigationBarItem(
                 selected = item.route == currentRoute,
@@ -48,7 +51,14 @@ fun BottomNavBar(
                         contentDescription = item.label
                     )
                 },
-                label = { Text(item.label) }
+                label = { Text(item.label) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                    selectedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    unselectedTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer // optional highlight
+                )
             )
         }
     }

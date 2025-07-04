@@ -22,6 +22,7 @@ import com.example.tmdbmovies.data.model.Movie
 import com.example.tmdbmovies.presentation.navigation.NavRoutes
 import com.example.tmdbmovies.ui.theme.TMDBMoviesTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     viewModel: FeedViewModel = hiltViewModel(),
@@ -33,20 +34,37 @@ fun FeedScreen(
         viewModel.loadTrendingMovies()
     }
 
-    when (state) {
-        is FeedUiState.Loading -> LoadingState()
-        is FeedUiState.Error -> ErrorState(
-            message = (state as FeedUiState.Error).message,
-            onRetry = { viewModel.loadTrendingMovies() }
-        )
-        is FeedUiState.Success -> SuccessState(
-            movies = (state as FeedUiState.Success).movies,
-            onMovieClick = { movieId ->
-                navController.navigate(NavRoutes.detailsRoute(movieId))
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Feed", style = MaterialTheme.typography.titleLarge) },
+                modifier = Modifier
+                    .statusBarsPadding(),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (state) {
+                is FeedUiState.Loading -> LoadingState()
+                is FeedUiState.Error -> ErrorState(
+                    message = (state as FeedUiState.Error).message,
+                    onRetry = { viewModel.loadTrendingMovies() }
+                )
+                is FeedUiState.Success -> SuccessState(
+                    movies = (state as FeedUiState.Success).movies,
+                    onMovieClick = { movieId ->
+                        navController.navigate(NavRoutes.detailsRoute(movieId))
+                    }
+                )
             }
-        )
+        }
     }
 }
+
 
 @Composable
 fun LoadingState() {
