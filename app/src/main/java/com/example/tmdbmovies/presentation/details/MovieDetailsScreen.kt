@@ -2,6 +2,9 @@ package com.example.tmdbmovies.presentation.details
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ fun MovieDetailsScreen(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState()
 
     LaunchedEffect(movieId) {
         viewModel.loadMovie(movieId)
@@ -35,7 +39,9 @@ fun MovieDetailsScreen(
                 overview = movie.overview,
                 releaseDate = movie.releaseDate,
                 voteAverage = movie.voteAverage,
-                posterPath = movie.posterPath
+                posterPath = movie.posterPath,
+                isFavorite = isFavorite,
+                onToggleFavorite = { viewModel.toggleFavorite() }
             )
         }
     }
@@ -47,7 +53,9 @@ fun MovieDetailContent(
     overview: String?,
     releaseDate: String?,
     voteAverage: Float?,
-    posterPath: String?
+    posterPath: String?,
+    isFavorite: Boolean,
+    onToggleFavorite: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -73,7 +81,24 @@ fun MovieDetailContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Text(text = title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onToggleFavorite) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Unfavorite" else "Favorite"
+                )
+            }
+        }
 
         releaseDate?.let {
             Text(text = "Release Date: $it", style = MaterialTheme.typography.bodySmall)
@@ -87,12 +112,6 @@ fun MovieDetailContent(
 
         overview?.let {
             Text(text = it, style = MaterialTheme.typography.bodyMedium)
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(onClick = { /* TODO: Save to favorites */ }) {
-            Text("Add to Favorites")
         }
     }
 }

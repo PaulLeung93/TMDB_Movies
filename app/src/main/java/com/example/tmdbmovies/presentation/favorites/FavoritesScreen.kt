@@ -1,28 +1,39 @@
 package com.example.tmdbmovies.presentation.favorites
 
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.tmdbmovies.data.model.Movie
 import com.example.tmdbmovies.presentation.feed.MovieCard
 
 @Composable
 fun FavoritesScreen(
-    viewModel: FavoritesViewModel = hiltViewModel()
+    allMovies: List<Movie>,
+    favoriteIds: Set<Int>,
+    onMovieClick: (Movie) -> Unit
 ) {
-    val favorites by viewModel.uiState.collectAsState()
+    val favoriteMovies = remember(allMovies, favoriteIds) {
+        allMovies.filter { it.id in favoriteIds }
+    }
 
-    if (favorites.isEmpty()) {
-        Text("No favorites yet!")
+    if (favoriteMovies.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No favorites yet!", style = MaterialTheme.typography.bodyLarge)
+        }
     } else {
-        LazyVerticalGrid(columns = GridCells.Adaptive(128.dp)) {
-            items(favorites) { movie ->
-                //Leave onClick empty, since Favorites Screen does not need click handling
-                MovieCard(movie = movie, onClick = {})
-
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(favoriteMovies) { movie ->
+                MovieCard(movie = movie, onClick = { onMovieClick(movie) })
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
