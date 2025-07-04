@@ -16,10 +16,16 @@ data class Movie(
     val id: Int,
     val title: String,
 
-    //Nullable (some movies may not have a poster)
-    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("poster_path")
+    val posterPath: String?,
 
-    @SerializedName("release_date") val releaseDate: String?,
+    @SerializedName("release_date")
+    val releaseDate: String?,
 
-    @SerializedName("vote_average") val voteAverage: Float?
+    @SerializedName("vote_average")
+    val voteAverage: Float?,
+
+    @SerializedName("overview")
+    val overview: String?
 )
+
